@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- voir https://greensock.com/docs/v3/Installation#installer -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        svg {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="svgelement.js"></script>
+    <script>
+        class Voilier {
+            constructor(parent, x, y) {
+                // groupe pour englober le voilier
+                const g = parent.appendElement("g");
+                g.setAttributes({ transform: `translate(${x} ${y})` })
+
+                // Coque (coordonnées relatives au point de référence)
+                g.appendElement("path", {
+                    d: "M 3 0 L -2.5 0.3 L -3 1.5 L 2 1.5 Z",
+                    fill: "brown"
+                });
+                
+                // voile
+                g.appendElement("path", {
+                    d: "M 3 0 L 0 -4.5 L -2 0 Z",
+                    fill: "white",
+                });
+
+                // mat
+                g.appendElement("rect", {
+                    x: "0", y: "-4.5", width: "0.2", height: "5",
+                    fill: "LightGray"
+                });
+
+
+            }
+        }
+
+        class Paysage {
+            constructor(parent) {
+                // groupe pour le paysage
+                const g = parent.appendElement("g");
+
+                // Fond
+                g.appendElement("rect", {
+                    x: 0, y: 0, width: 16, height: 9,
+                    fill: "#DFF"
+                });
+
+                // Voilier
+                const voilier = new Voilier(g, 4, 7);
+            }
+        }
+
+        // Initialisation quand la page est prête
+        document.addEventListener('DOMContentLoaded', function () {
+            const svg = SVGelement.fromSelector("#dessin-demo");
+            if (svg) {
+                new Paysage(svg);
+            }
+        });
+    </script>
+
+    <div style="text-align: center; margin: 20px 0;">
+        <h3>Démo Interactive - Paysage généré par JavaScript</h3>
+        <svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 16 9" id="dessin-demo"
+            style="border: 1px solid #333;">
+        </svg>
+    </div>
+</body>
+
+</html>
