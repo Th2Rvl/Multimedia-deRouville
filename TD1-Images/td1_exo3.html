@@ -18,20 +18,34 @@
 </head>
 
 <body>
-    <h2>TD1 - Exercice SVG</h2>
-
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="svgelement.js"></script>
     <script>
         class Voilier {
-            constructor(parent) {
+            constructor(parent, x, y) {
                 // groupe pour englober le voilier
                 const g = parent.appendElement("g");
+                g.setAttributes({ transform: `translate(${x} ${y})` })
 
                 // Coque (coordonnées relatives au point de référence)
                 g.appendElement("path", {
                     d: "M 3 0 L -2.5 0.3 L -3 1.5 L 2 1.5 Z",
                     fill: "brown"
                 });
+                
+                // voile
+                g.appendElement("path", {
+                    d: "M 3 0 L 0 -4.5 L -2 0 Z",
+                    fill: "white",
+                });
+
+                // mat
+                g.appendElement("path", {
+                    d: "x: 0, y: -4.5, width: 0.2, height: 5",
+                    fill: "LightGray"
+                });
+
+
             }
         }
 
