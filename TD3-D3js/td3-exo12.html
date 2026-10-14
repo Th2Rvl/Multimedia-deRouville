@@ -21,7 +21,7 @@
             .data(aliments)            // 2. Liaison aux données : Associe chaque donnée à un élément DOM
             .join("li")                // 3. Ajustement DOM ↔ données : Crée/supprime/met à jour les éléments
             .append("tt")              // Imbrication de sous-éléments 
-            .text(d => d)              // 4. Définition du contenu
+            .text(d => `Je dois acheter ${d.article} ${d.nom}`)              // 4. Définition du contenu
             .attr("style", "list-style-type: circle;")
             .style("list-style-type", "square")
             .style("font-family", "cursive")
