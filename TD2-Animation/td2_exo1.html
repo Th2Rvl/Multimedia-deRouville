@@ -46,7 +46,7 @@
         <button onclick="animation4()">Animation 4</button>
         <button onclick="animation5()">Animation 5</button>
     </div>
-    <script src="svgelement.js"></script>
+
     <script>
         // éléments du dessin SVG
         const titre = SVGelement.fromSelector("#titre")
@@ -100,14 +100,13 @@
         function animation2() {
             // mettre en place la situation de départ
             reset()
+            // attr: {...} pour animer l'attribut opacity et non le style
             gsap.set(titre, {
-                // TODO mettre opacity à 0
-                opacity: 0
+                attr: { opacity: 0 },
             })
             // animer vers la situation finale
             gsap.to(titre, {
-                // TODO mettre opacity à 1
-                opacity: 1,
+                attr: { opacity: 1 },
                 delay: 1,
                 duration: 2,
                 ease: "power2.in",
@@ -117,14 +116,13 @@
         function animation3() {
             // mettre en place la situation de départ
             reset()
+            // couleurs en HSL pour rester vif (en RGB, on passe par un jaune foncé)
             gsap.set(titre, {
-                // TODO mettre fill à red
-                fill: "red"
+                fill: "hsl(0, 100%, 50%)",      // rouge
             })
             // animer vers la situation finale
             gsap.to(titre, {
-                // TODO mettre fill à green
-                fill: "green",
+                fill: "hsl(150, 100%, 40%)",    // vert
                 duration: 6,
                 ease: "none",
             })
@@ -134,12 +132,10 @@
             // mettre en place la situation de départ
             reset()
             gsap.set(titre, {
-                // TODO mettre le style à 'font: 0px sans-serif;'
-                font: "0px sans-serif"
+                font: "0px sans-serif",
             })
             // animer vers la situation finale
             gsap.to(titre, {
-                // TODO mettre le style à 'font: 24px sans-serif;'
                 font: "24px sans-serif",
                 duration: 2,
                 ease: "power2.in",
@@ -149,16 +145,15 @@
         function animation5() {
             // mettre en place la situation de départ
             reset()
+            // letterSpacing en CamelCase = 'letter-spacing'
             gsap.set(titre, {
-                // TODO initialiser à 'font: 24px sans-serif; letter-spacing: 20px'
                 font: "24px sans-serif",
-                "letter-spacing": "20px"
+                letterSpacing: "20px",
             })
             // animer vers la situation finale
             gsap.to(titre, {
-                // TODO animer vers 'font: 24px sans-serif; letter-spacing: 0px'
-                font: "24px sans-serif", 
-                "letter-spacing": "0px",
+                font: "24px sans-serif",
+                letterSpacing: "0px",
                 duration: 2,
                 ease: "power2.out",
             })

@@ -44,6 +44,7 @@
     </div>
 
     <script>
+        gsap.registerPlugin(MotionPathPlugin)
 
         // éléments HTML
         const terrain = document.getElementById("terrain")
@@ -91,8 +92,8 @@
 
             // événements
             TL.to(car, { x: xmax() - 50, duration: 6, ease: "power2.inOut" })
-            TL.to(car, {rotation: 90, duration: 1, ease: "none" })
-            TL.to(car, {y: ymax()-50, duration: 4, ease: "power2.inOut" })
+            TL.to(car, { rotation: 90, duration: 1, ease: "none" }, ">-0.5")
+            TL.to(car, { y: ymax() - 50, duration: 4, ease: "power2.inOut" }, ">-0.5")
         }
 
 
@@ -100,13 +101,23 @@
          * passage par quelques points clés
          */
         function animation3() {
+            reset()
+
+            const xDebut = 50
+            const xFin = xmax() - 50
+            const distance = xFin - xDebut
+
             gsap.to(car, {
                 motionPath: {
                     path: [
-                        // TODO ajouter d'autres points ici
-                        { x: xmax() - 50, y: 200 }
+                        { x: 100, y: 200 },                         
+                        { x: xDebut + distance / 3, y: 120 },       
+                        { x: xDebut + 2 * distance / 3, y: 280 },   
+                        { x: xmax() - 100, y: 200 },                
+                        { x: xFin, y: 200 },                        
                     ],
-                    // TODO configuration du chemin
+                    autoRotate: true,   
+                    curviness: 1,      
                 },
                 duration: 5,
                 ease: "power2.inOut"
