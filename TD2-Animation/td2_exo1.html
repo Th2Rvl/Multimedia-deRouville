@@ -51,46 +51,39 @@
         // éléments du dessin SVG
         const titre = SVGelement.fromSelector("#titre")
 
-        // mettre en place la situation de départ commune
         function reset() {
-            // interrompre les animations du titre
             gsap.killTweensOf(titre);
-            // définir l'état au repos
             gsap.set(titre, {
-                x: 0,   // piège : x et y ici sont des translations, voir transform-origin
+                x: 0,  
                 y: 0,
                 scale: 1,
                 fill: "black",
                 font: "24px sans-serif",
                 letterSpacing: "0px",
                 attr: {
-                    x: 50,  // piège : ici, x et y sont des positions
+                    x: 50,  
                     y: 50,
                     fill: "black",
                     opacity: 1,
-                    "transform-origin": "100 50", // référence des translations
+                    "transform-origin": "100 50", 
                 }
             })
         }
 
-        // appeler la fonction une première fois
         reset()
 
 
         function animation1() {
-            // mettre en place la situation de départ
             reset()
             gsap.set(titre, {
-                // y: -60,     // translation
+                // y: -60,     
                    attr: {
-                     y: -10,       // position
+                     y: -10,       
                    },
             })
-            // animer vers la situation finale
             gsap.to(titre, {
-                // y: 0,     // translation
                    attr: {
-                     y: 50,       // position
+                     y: 50,       
                    },
                 duration: 2,
                 ease: "power2.out",
@@ -98,13 +91,10 @@
         }
 
         function animation2() {
-            // mettre en place la situation de départ
             reset()
-            // attr: {...} pour animer l'attribut opacity et non le style
             gsap.set(titre, {
                 attr: { opacity: 0 },
             })
-            // animer vers la situation finale
             gsap.to(titre, {
                 attr: { opacity: 1 },
                 delay: 1,
@@ -114,27 +104,22 @@
         }
 
         function animation3() {
-            // mettre en place la situation de départ
             reset()
-            // couleurs en HSL pour rester vif (en RGB, on passe par un jaune foncé)
             gsap.set(titre, {
-                fill: "hsl(0, 100%, 50%)",      // rouge
+                fill: "hsl(0, 100%, 50%)",      
             })
-            // animer vers la situation finale
             gsap.to(titre, {
-                fill: "hsl(150, 100%, 40%)",    // vert
+                fill: "hsl(150, 100%, 40%)",   
                 duration: 6,
                 ease: "none",
             })
         }
 
         function animation4() {
-            // mettre en place la situation de départ
             reset()
             gsap.set(titre, {
                 font: "0px sans-serif",
             })
-            // animer vers la situation finale
             gsap.to(titre, {
                 font: "24px sans-serif",
                 duration: 2,
@@ -143,14 +128,11 @@
         }
 
         function animation5() {
-            // mettre en place la situation de départ
             reset()
-            // letterSpacing en CamelCase = 'letter-spacing'
             gsap.set(titre, {
                 font: "24px sans-serif",
                 letterSpacing: "20px",
             })
-            // animer vers la situation finale
             gsap.to(titre, {
                 font: "24px sans-serif",
                 letterSpacing: "0px",
