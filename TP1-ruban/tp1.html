@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>TP1</title>
+    <!-- voir https://greensock.com/docs/v3/Installation#installer -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+
+<body>
+    <div style="margin: 10px;">
+        <button onclick="reset()">Reset</button>
+        <button onclick="animation1()">Animation 1</button>
+        <button onclick="animation2()">Animation 2</button>
+        <button onclick="animation3()">Animation 3</button>
+        <button onclick="animation4()">Animation 4</button>
+        <select onchange="changeRibbon(this.value)">
+            <option value="HorizontalLine">HorizontalLine</option>
+            <option value="PolarLine">PolarLine</option>
+            <option value="Circle">Circle</option>
+            <option value="SpiralV1">SpiralV1</option>
+            <option value="SpiralV2" selected>SpiralV2</option>
+        </select>
+    </div>
+
+    <!-- dessin SVG créé et modifié par les scripts JS -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 200 200" id="dessin">
+    </svg>
+
+    <!-- utilisation du mixin SVGelement -->
+    <script src="svgelement.js"></script>
+
+    <script>
+        // compléments à la librairie Math
+        Math.radians = (deg) => deg * Math.PI / 180
+        Math.degrees = (rad) => rad / Math.PI * 180
+
+        /** Représente et dessine une led dans un SVG */
+        class Led {
+            constructor(parent, x, y, radius) {
+                this._state = 0
+                this.led = parent.appendElement("circle", {
+                    cx: x,
+                    cy: y,
+                    r: radius - radius/16,
+                    fill: "gray",
+                    stroke: "black",
+                    'stroke-width': radius/8
+                })
+            }
+
+            turnOn(timeline, duration=0.1, position=">") {
+                timeline.to(this.led, { attr: { fill: "red" }, duration }, position)
+            }
+
+            turnOff(timeline, duration=0.1, position=">") {
+                timeline.to(this.led, { attr: { fill: "gray" }, duration }, position)
+            }
+
+            get state() {
+                return this._state
+            }
+
+            set state(value) {
+                this._state = Math.min(1, Math.max(0, value))
+                const color = gsap.utils.interpolate("gray", "rgb(127, 255, 0)", this._state)
+                this.led.setAttribute("fill", color)
+            }
+
+            reset() {
+                this.state = 0
+                gsap.killTweensOf(this)
+            }
+        }
+
+        class LedRibbon {
+            constructor(parent, generator) {
+                // liste des leds créées par ce ruban
+                this.leds = []
+                for (const {x, y, radius} of generator) {
+                    this.leds.push(new Led(parent, x, y, radius))
+                }
+            }
+
+            reset() {
+                for (const led of this.leds) {
+                    led.reset()
+                }
+            }
+
+            turnOnOff(timeline, durationOn) {
+                for (const led of this.leds) {
+                    timeline.to(led, { state: 1.0, duration: 0.05 })
+                    timeline.to(led, { state: 0.0, duration: 0.05 }, `>+${durationOn}`)
+                }
+            }
+
+            remove() {
+                for (const led of this.leds) {
+                    led.led.remove()
+                }
+                this.leds = []
+            }
+        }
+
+        /**
+         * fournit successivement number objets {x, y, radius} donnant les coordonnées
+         * {x, y, radius}, {x+interval, y, radius}, {x+2×interval, y, radius}, {x+3×interval,...
+         * avec interval = radius×2 + spacing
+         * @param number : nombre de coordonnées fournies au total
+         * @param x,y : premières coordonnées renvoyées
+         * @param spacing : intervalle entre les différents x retournés
+         * @return générateur de {x, y, radius}
+         */
+        function* HorizontalLine({number, x, y, spacing=0, radius=4} = {}) {
+            const interval = radius*2 + spacing
+            for (let i = 0; i < number; i++) {
+                yield {x, y, radius}
+                x += interval
+            }
+        }
+
+        function* PolarLine({number, x, y, angle, spacing=0, radius=4} = {}) {
+            const rad = Math.radians(angle)
+            const interval = radius*2 + spacing
+            const dx = interval * Math.cos(rad)
+            const dy = interval * Math.sin(rad)
+            for (let i = 0; i < number; i++) {
+                yield {x, y, radius}
+                x += dx
+                y += dy
+            }
+        }
+
+        function* Circle({number, cx, cy, r, radius=4} = {}) {
+            for (let i = 0; i < number; i++) {
+                const angle = 2 * Math.PI * i / number
+                const x = cx + r * Math.cos(angle)
+                const y = cy + r * Math.sin(angle)
+                yield {x, y, radius}
+            }
+        }
+
+        function* SpiralV1({number, cx, cy, turns, pitch, radius=4} = {}) {
+            for (let i = 0; i < number; i++) {
+                const angle = turns * 2 * Math.PI * i / number
+                const r = turns * pitch * i / number
+                const x = cx + r * Math.cos(angle)
+                const y = cy + r * Math.sin(angle)
+                yield {x, y, radius}
+            }
+        }
+
+        function* SpiralV2({number, cx, cy, pitch, spacing, radius=4} = {}) {
+            let angle = 0
+            for (let i = 0; i < number; i++) {
+                angle = Math.sqrt(2 * spacing**2 / pitch + angle**2)
+                const r = pitch * angle / (2 * Math.PI)
+                const x = cx + r * Math.cos(angle)
+                const y = cy + r * Math.sin(angle)
+                yield {x, y, radius}
+            }
+        }
+
+        const generators = {
+            HorizontalLine: () => HorizontalLine({
+                number: 16, // nombre de leds
+                x: 8, y: 8, // centre de la première led
+            }),
+            PolarLine: () => PolarLine({
+                number: 16, // nombre de leds
+                x: 8, y: 8, // centre de la première led
+                angle: 25 // angle
+            }),
+            Circle: () => Circle({
+                number: 24, // nombre de leds
+                cx: 50, cy: 50, // centre du cercle
+                r: 36 // rayon du cercle
+            }),
+            SpiralV1: () => SpiralV1({
+                number: 48, // nombre de leds
+                cx: 120, cy: 50, // centre de la spirale
+                turns: 3, // nombre de tours
+                pitch: 12 // écart entre les spires
+            }),
+            SpiralV2: () => SpiralV2({
+                number: 44, // nombre de leds
+                cx: 120, cy: 50, // centre de la spirale
+                pitch: 12, // écart entre les spires
+                spacing: 7, // écart entre les leds
+            }),
+        }
+
+        // dessin SVG
+        const svg = SVGelement.fromSelector("#dessin")
+        // dessiner une led
+        const led = new Led(svg, 50, 50, 16)
+        // dessiner un ruban de leds
+        let ribbon = new LedRibbon(svg, generators.SpiralV2())
+
+        function changeRibbon(name) {
+            reset()
+            ribbon.remove()
+            ribbon = new LedRibbon(svg, generators[name]())
+        }
+
+        function reset() {
+            gsap.killTweensOf("*")
+            led.reset()
+            ribbon.reset()
+        }
+
+        function animation1() {
+            reset()
+            // allumer la led puis l'éteindre, dans une timeline
+            const TLled = gsap.timeline()
+            led.turnOn(TLled, 1.0) // allumage en 1 seconde
+            led.turnOff(TLled, 0.5, ">+2") // extinction en 1/2 s après 2 secondes
+        }
+
+        function animation2() {
+            reset()
+            const TLled = gsap.timeline()
+            TLled.to(led, {
+                state: 1.0, // 1.0 = pleinement allumée
+                duration: 1.0
+            })
+            TLled.to(led, {
+                state: 0.0, // 0.0 = totalement éteinte
+                duration: 0.5
+            }, ">+2") // voir timeline.to(target, vars, position)
+        }
+
+        function animation3() {
+            reset()
+            const TLled = gsap.timeline()
+            led.turnOn(TLled, 1.0)
+            led.turnOff(TLled, 0.5, ">+2")
+            TLled.to(led, { state: 1.0, duration: 1.0 })
+            TLled.to(led, { state: 0.0, duration: 0.5 }, ">+2")
+        }
+
+        function animation4() {
+            reset()
+            // allumer puis éteindre toutes les leds les unes après les autres dans une timeline
+            const TLrib = gsap.timeline()
+            ribbon.turnOnOff(TLrib, 0.2) // chaque led allumée 0.2 seconde
+        }
+    </script>
+</body>
+
+</html>

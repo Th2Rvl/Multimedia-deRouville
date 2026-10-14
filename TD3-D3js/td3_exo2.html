@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>TD3 exo 2</title>
+    <!-- voir https://d3js.org/getting-started -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+
+<body>
+    <svg id="dessin"></svg>
+    <script>
+        const width = 400
+        const height = 200
+        const margin = { top: 20, right: 10, bottom: 30, left: 40 }
+        const colors = {
+            "setosa": "#69b3a2",
+            "versicolor": "#a269b3",
+            "virginica": "#b3a269",
+        }
+
+        function ScatterPlot(iris) {
+            const svg = d3.select("#dessin")
+            svg.attr("viewBox", `0 0 ${width} ${height}`)
+
+            const fX = d3.scaleLinear()
+                .domain(d3.extent(iris, d => d.sepal_length))
+                .range([margin.left, width - margin.right])
+
+            const fY = d3.scaleLinear()
+                .domain(d3.extent(iris, d => d.petal_length))
+                .range([height - margin.bottom, margin.top])
+
+            svg.selectAll("circle")
+                .data(iris)
+                .join("circle")
+                .attr("cx", d => fX(d.sepal_length))
+                .attr("cy", d => fY(d.petal_length))
+                .attr("r", width / 100)
+                .attr("fill", d => colors[d.species])
+
+            svg.append("g")
+                .attr("transform", `translate(0,${height - margin.bottom})`)
+                .call(d3.axisBottom(fX))
+
+            svg.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(fY))
+
+            const gTitresAxes = svg.append("g")
+                .style("font-family", "sans-serif")
+                .attr("font-size", height / 20)
+                .style("text-anchor", "end")
+                .style("fill", "black")
+
+            gTitresAxes.append("text")
+                .attr("x", width - margin.right)
+                .attr("y", height)
+                .attr("dominant-baseline", "ideographic")
+                .text("sepalLength")
+
+            gTitresAxes.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -margin.top)
+                .attr("y", 0)
+                .attr("dominant-baseline", "hanging")
+                .text("petalLength")
+        }
+
+        d3.json("iris.json").then(ScatterPlot)
+    </script>
+</body>
+
+</html>

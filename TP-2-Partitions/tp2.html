@@ -1,0 +1,93 @@
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Dessin SVG avec d3.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+
+<body>
+    <svg xmlns="http://www.w3.org/2000/svg" id="dessin"></svg>
+
+    <script type="module">
+
+        // voir https://stackoverflow.com/a/65056488 (append if not exist)
+        d3.selection.prototype.appendIfAbsent = function (selector, type) {
+            const element = this.select(selector)
+            return element.empty() ? this.append(type) : element
+        }
+
+        function PartitionFloue(trapezes) {
+            console.log("TRAPEZES", trapezes)
+            const svg = d3.select("#dessin")
+            const width = 600
+            const height = width / 4
+            svg.attr("viewBox", `0 0 ${width} ${height}`)
+            const margin = { top: 20, right: 10, bottom: 20, left: 10 }
+
+            const N = trapezes.length
+
+            const fX = d3.scaleLinear()
+                .domain([trapezes[0].supL - 1, trapezes[N - 1].supH + 1])
+                .range([margin.left, width - margin.right])
+
+            const fY = d3.scaleLinear()
+                .domain([0, 1])
+                .range([height - margin.bottom, margin.top])
+
+            const bottom = fY(0)
+            const top = fY(1)
+
+            const fColor = d3.scaleOrdinal()
+                .domain(d3.range(N))
+                .range(d3.schemeSet2)
+
+            svg.append("g")
+                .attr("transform", `translate(0,${bottom})`)
+                .call(d3.axisBottom(fX))
+
+            svg.append("g")
+                .attr("transform", `translate(0,${top})`)
+                .call(d3.axisTop(fX))
+
+            const grpTrapezes = svg.append("g")
+                .attr("text-anchor", "middle")
+
+            grpTrapezes.selectAll("g")
+                .data(trapezes)
+                .join(
+                    enter => {
+                        const g = enter.append("g")
+                        g.append("path")
+                            .attr("d", trp => `M ${fX(trp.supL)} ${bottom}
+                                   L ${fX(trp.corL)} ${top}
+                                   L ${fX(trp.corH)} ${top}
+                                   L ${fX(trp.supH)} ${bottom}`)
+                            .attr("stroke", trp => fColor(trp.id))
+                            .attr("stroke-width", 2)
+                            .attr("fill", trp => fColor(trp.id))
+                            .attr("fill-opacity", 0.4)
+                        g.append("text")
+                            .attr("x", trp => fX((trp.corL + trp.corH) / 2))
+                            .attr("y", (top + bottom) / 2)
+                            .attr("dominant-baseline", "middle")
+                            .text(trp => trp.nom)
+                    }
+                )
+        }
+
+
+        const Trapezes = [
+            { id: 0, supL: 5, corL: 11, corH: 14, supH: 18, nom: "froid" },
+            { id: 1, supL: 14, corL: 18, corH: 20, supH: 22, nom: "frais" },
+            { id: 2, supL: 20, corL: 22, corH: 24, supH: 30, nom: "tiède" },
+            { id: 3, supL: 24, corL: 30, corH: 38, supH: 42, nom: "chaud" },
+        ]
+
+        PartitionFloue(Trapezes)
+
+
+    </script>
+</body>
+
+</html>
